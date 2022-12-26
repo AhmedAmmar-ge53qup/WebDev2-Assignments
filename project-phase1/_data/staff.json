@@ -1,0 +1,47 @@
+[
+  {
+    "staffNo": 500,
+    "username": "coordinator",
+    "firstName": "Facilitator",
+    "lastName": "Coordinator",
+    "email": "coordinator@halaqa.org",
+    "password": "password",
+    "isCoordinator": 1
+  },
+  {
+    "staffNo": 501,
+    "username": "teacher1",
+    "firstName": "Fn1",
+    "lastName": "Ln1",
+    "email": "teacher1@halaqa.org",
+    "password": "password",
+    "halaqa": "حلقة تيجان النور"
+  },
+  {
+    "staffNo": 502,
+    "username": "teacher2",
+    "firstName": "Fn2",
+    "lastName": "Ln2",
+    "email": "teacher2@halaqa.org",
+    "password": "password",
+    "halaqa": "حلقة العبقري الصغير"
+  },
+  {
+    "staffNo": 503,
+    "username": "teacher3",
+    "firstName": "Fn3",
+    "lastName": "Ln3",
+    "email": "teacher3@halaqa.org",
+    "password": "password",
+    "halaqa": "حلقة نور الوحي"
+  },
+  {
+    "staffNo": 504,
+    "username": "teacher4",
+    "firstName": "Fn4",
+    "lastName": "Ln4",
+    "email": "teacher4@halaqa.org",
+    "password": "password",
+    "halaqa": "حلقة صوت الملائكة"
+  }
+]

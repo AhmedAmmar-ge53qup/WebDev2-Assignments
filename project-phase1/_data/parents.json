@@ -1,0 +1,173 @@
+[
+  {
+    "qatariId": 12,
+    "firstName": "Juha",
+    "lastName": "Dahak",
+    "mobile": "7777-888",
+    "email": "juha@test.com",
+    "username": "juha",
+    "password": "password",
+    "students": [
+      {
+        "studentId": "4573799090",
+        "firstName": "Ahmed",
+        "lastName": "Ammar",
+        "dob": "11/01/2008",
+        "gender": "M",
+        "schoolGrade": "6",
+        "teacherId": 503
+      },
+      {
+        "studentId": 1,
+        "firstName": "Ibn Juha",
+        "lastName": "Dahak",
+        "dob": "1/1/2009",
+        "gender": "M",
+        "schoolGrade": 4,
+        "teacherId": 501,
+        "isInActive": false
+      },
+      {
+        "studentId": "2",
+        "firstName": "Bint Juha ",
+        "lastName": "Dahak updated",
+        "dob": "01/05/2011",
+        "gender": "F",
+        "schoolGrade": "3",
+        "teacherId": 502
+      }
+    ]
+  },
+  {
+    "qatariId": 34,
+    "firstName": "Abbas",
+    "lastName": "Ibn Firnas",
+    "mobile": "9999-888",
+    "email": "abbas@test.com",
+    "username": "abbas",
+    "password": "password",
+    "students": [
+      {
+        "studentId": 4,
+        "firstName": "Bint Abbas",
+        "lastName": "Ibn Firnas",
+        "dob": "1/3/2012",
+        "gender": "F",
+        "schoolGrade": 2,
+        "teacherId": 502
+      },
+      {
+        "studentId": 3222138559,
+        "firstName": "Jack",
+        "lastName": "Wilson",
+        "dob": "11/16/2022",
+        "gender": "F",
+        "schoolGrade": "2",
+        "teacherId": 501
+      },
+      {
+        "studentId": 1178320572,
+        "firstName": "Jessica",
+        "lastName": "Jones",
+        "dob": "11/15/2022",
+        "gender": "F",
+        "schoolGrade": "321",
+        "teacherId": 502
+      },
+      {
+        "studentId": 5318865823,
+        "firstName": "John",
+        "lastName": "Wick",
+        "dob": "11/01/1996",
+        "gender": "M",
+        "schoolGrade": "55",
+        "teacherId": 503
+      },
+      {
+        "studentId": 3,
+        "firstName": "Ibn Abbas",
+        "lastName": "Ibn Firnas",
+        "dob": "1/2/2008",
+        "gender": "M",
+        "schoolGrade": 5,
+        "teacherId": 501,
+        "isInActive": false
+      },
+      {
+        "studentId": 4953359201,
+        "firstName": "React",
+        "lastName": "Query",
+        "dob": "1/2/2008",
+        "gender": "F",
+        "schoolGrade": "5",
+        "teacherId": 501
+      }
+    ]
+  },
+  {
+    "qatariId": 56,
+    "firstName": "Samira",
+    "lastName": "Saghir",
+    "mobile": "9999-888",
+    "email": "samira@test.com",
+    "username": "samira",
+    "password": "password",
+    "students": [
+      {
+        "studentId": 5,
+        "firstName": "Ibn Samira",
+        "lastName": "Saghir",
+        "dob": "1/2/2007",
+        "gender": "M",
+        "schoolGrade": 6,
+        "teacherId": 501
+      },
+      {
+        "studentId": 6,
+        "firstName": "Bint Samira",
+        "lastName": "Saghir",
+        "dob": "1/3/2010",
+        "gender": "F",
+        "schoolGrade": 3,
+        "teacherId": 502
+      },
+      {
+        "studentId": 9470181353,
+        "firstName": "Huda",
+        "lastName": "Fadol",
+        "dob": "06/08/2022",
+        "gender": "F",
+        "schoolGrade": "99",
+        "teacherId": 504
+      },
+      {
+        "studentId": 3402868479,
+        "firstName": "Michael",
+        "lastName": "Jackson",
+        "dob": "11/16/2022",
+        "gender": "M",
+        "schoolGrade": "42",
+        "teacherId": 503,
+        "isInActive": true
+      },
+      {
+        "studentId": "4385913120",
+        "firstName": "Reacto",
+        "lastName": "Dateo",
+        "dob": "11/01/2015",
+        "gender": "F",
+        "schoolGrade": "5",
+        "teacherId": 502
+      },
+      {
+        "studentId": 525768911,
+        "firstName": "MohamedDOC",
+        "lastName": "AbbasDOC",
+        "dob": "12/24/2005",
+        "gender": "M",
+        "schoolGrade": "8",
+        "teacherId": 502
+      }
+    ]
+  }
+]
