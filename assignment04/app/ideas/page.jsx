@@ -22,79 +22,44 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 export default function Ideas() {
   const [isClicked, setIsClicked] = useState(false);
+  const [ideas, setIdeas] = useState([]);
   const titleRef = useRef();
   const descriptionRef = useRef();
   const [isTitle, setIsTitle] = useState(false);
   const [isDescription, setIsDescription] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  // Generating the UUID for the first time
-  useEffect(() => {
-    axios
-      .get("api/identifier", {
-        params: {
-          uuid: localStorage.user,
-        },
-      })
-      .then((res) => {
-        localStorage.user = res.data;
-      });
+   // Load ideas from localStorage when component mounts
+   useEffect(() => {
+    const storedIdeas = JSON.parse(localStorage.getItem("ideas"));
+    if (storedIdeas) {
+      setIdeas(storedIdeas);
+    }
   }, []);
 
-  const ideasQuery = useQuery(["ideas"], async () => {
-    const res = await fetch(`api/${localStorage.user}/ideas`);
-    const json = await res.json();
-    return json;
-  });
-
-  const createIdeaMutation = useMutation(
-    async (newIdea) => {
-      axios
-        .post(`api/${localStorage.user}/ideas`, newIdea)
-        .then((res) => {
-          setIsClicked(false);
-          return res;
-        })
-        .catch((err) => {
-          console.log(err);
-          alert("ERROR POSTING");
-          return res;
-        });
-    },
-    {
-      onMutate: async (newIdea) => {
-        await queryClient.cancelQueries(["ideas"]);
-        const prevIdeas = queryClient.getQueriesData(["ideas"]);
-        queryClient.setQueryData(["ideas", (old) => [...old, newIdea]]);
-
-        return { prevIdeas };
-      },
-      onError: (err, newIdea, context) => {
-        queryClient.setQueryData(["ideas"], context.prevIdeas);
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["ideas"]);
-      },
-    }
-  );
-
-  const deleteIdeaMutation = useMutation(
-    async (id) => {
-      return axios
-        .delete(`api/${localStorage.user}/ideas`, { data: { id } })
-        .then((res) => console.log(res))
-        .catch((err) => {
-          console.log(err);
-          alert("ERROR DELTEING");
-        });
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["ideas"]);
-      },
-    }
-  );
+  const addIdea = () => {
+    const newIdea = {
+      id: Math.floor(Math.random() * 100000000),
+      title: titleRef.current.value,
+      description: descriptionRef.current.value,
+      date: moment().format("MMMM Do YYYY, h:mm:ss a"),
+    };
+    // Update localStorage
+    const updatedIdeas = [...ideas, newIdea];
+    localStorage.setItem("ideas", JSON.stringify(updatedIdeas));
+    // Update state
+    setIdeas(updatedIdeas);
+    setIsClicked(false);
+    titleRef.current.value = "";
+    descriptionRef.current.value = "";
+  };
+  
+  const deleteIdea = (id) => {
+    // Update localStorage
+    const updatedIdeas = ideas.filter((idea) => idea.id !== id);
+    localStorage.setItem("ideas", JSON.stringify(updatedIdeas));
+    // Update state
+    setIdeas(updatedIdeas);
+  };
 
   const buttonOrNot = isClicked ? (
     <Form>
@@ -109,18 +74,10 @@ export default function Ideas() {
       />
       <Grid>
         <IconButton
-          onClick={() =>
-            createIdeaMutation.mutate({
-              id: Math.floor(Math.random() * 100000000),
-              user: localStorage.user,
-              title: titleRef.current.value,
-              description: descriptionRef.current.value,
-              date: moment().format("MMMM Do YYYY, h:mm:ss a"),
-            })
-          }
+          onClick={addIdea}
           disabled={isTitle && isDescription ? false : true}
         >
-          {createIdeaMutation.isLoading ? (
+          {false ? (
             <CircularProgress />
           ) : (
             <SaveIcon color={isTitle && isDescription ? "success" : "disabled"} />
@@ -149,10 +106,10 @@ export default function Ideas() {
       >
         {buttonOrNot}
         <Grid container flexDirection={"column"} rowGap={1.5} maxWidth={600}>
-          {ideasQuery.status == "loading" ? (
+          {!ideas ? (
             <CircularProgress />
           ) : (
-            ideasQuery.data.map((idea) => (
+            ideas.map((idea)=> (
               <Card key={idea.id}>
                 <CardContent>
                   <Typography variant="h4">{idea.title}</Typography>
@@ -171,11 +128,11 @@ export default function Ideas() {
                   >
                     {idea.date}
                   </Typography>
-                  {deleteIdeaMutation.isLoading ? (
+                  {false? (
                     <CircularProgress />
                   ) : (
                     <IconButton
-                      onClick={() => deleteIdeaMutation.mutate(idea.id)}
+                      onClick={() =>  deleteIdea(idea.id)}
                     >
                       <DeleteIcon color="error" />
                     </IconButton>
