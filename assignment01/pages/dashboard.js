@@ -61,7 +61,8 @@ export default function Dashboard() {
     fetchStatedispatcher({ type: FETCH_ACTIONS.FETCH_LOADING }); // Setting fetch state to loading
 
     // Fetching data based on baseCurrency provided by user
-    fetch(`https://api.exchangerate.host/latest?base=${baseCurrency}`)
+    fetch(`https://api.frankfurter.app/latest?from=${baseCurrency}`)
+
       .then((res) =>
         res.json().then((data) => {
           setRates(data.rates);
@@ -87,7 +88,7 @@ export default function Dashboard() {
               disablePortal
               id="combo-box-demo"
               value={baseCurrency}
-              options={Object.keys(rates).map((currencyName) => currencyName)}
+              options={rates ? Object.keys(rates).map((currencyName) => currencyName) : []}
               sx={{ width: 300 }}
               renderInput={(params) => (
                 <TextField {...params} label="Base Currency" />
@@ -101,13 +102,13 @@ export default function Dashboard() {
           </FormControl>
         </Box>
         <Grid container gap={1.5}>
-          {Object.keys(rates).map((currencyName) => (
+          {rates ? Object.keys(rates).map((currencyName) => (
             <Pair
               key={currencyName}
               name={`${baseCurrency}/${currencyName}`}
               conversionRate={rates[currencyName]}
             />
-          ))}
+          )) : null}
         </Grid>
       </Container>
     </>
