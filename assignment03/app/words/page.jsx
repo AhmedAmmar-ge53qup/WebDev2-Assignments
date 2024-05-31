@@ -7,9 +7,10 @@ import WordsTable from "../../components/words-table";
 export default function Words() {
   // Get search input from localStorage or set it to an empty string
   const [query, setQuery] = useState(
-    localStorage.getItem("searchInput") || ""
+    typeof window !== "undefined"
+      ? localStorage.getItem("searchInput") || ""
+      : ""
   );
-
   // Fetching the data based on query
   const wordsQuery = useQuery(["words", query], async () => {
     const res = await fetch(`https://api.datamuse.com/words?ml=${query}`);
@@ -19,7 +20,9 @@ export default function Words() {
 
   // Update localStorage when search input changes
   useEffect(() => {
-    localStorage.setItem("searchInput", query);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("searchInput", query);
+    }
   }, [query]);
 
   const rows = wordsQuery.data?.map(a => {
