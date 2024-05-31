@@ -24,7 +24,7 @@ export default function Layout({ children }) {
   const removeSelected = useWordsStore((state) => state.deleteWord);
 
   // Gets set based on the query parameters
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(localStorage.getItem("searchInput") || "");
   const searchInputRef = useRef();
 
   // Fetching the data based on searchInput
@@ -47,6 +47,10 @@ export default function Layout({ children }) {
       // router.replace(`${pathName}?query=${searchInput}`);
     // }
   // }, [pathName, router, searchInput]);
+
+  useEffect(() => {
+    localStorage.setItem("searchInput", searchInput);
+  }, [searchInput]);
 
   return (
     <Container>
