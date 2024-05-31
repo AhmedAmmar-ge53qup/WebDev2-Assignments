@@ -2,6 +2,15 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
+export async function getServerSideProps(context) {
+  return {
+    redirect: {
+      destination: '/dashboard',
+      permanent: false, // Set to true if this is a permanent redirect
+    },
+  };
+}
+
 export default function Home() {
   return (
     <div className={styles.container}>
