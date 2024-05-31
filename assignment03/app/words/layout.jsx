@@ -11,10 +11,9 @@ import {
   TextField,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState, useTransition, useCallback } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState, useTransition } from "react";
 import useWordsStore from "../../stores/wordsStore";
-import { debounce } from "../../utils/debounce";
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -24,34 +23,30 @@ export default function Layout({ children }) {
   const wordsOfInterest = useWordsStore((state) => state.words);
   const removeSelected = useWordsStore((state) => state.deleteWord);
 
+  // Gets set based on the query parameters
   const [searchInput, setSearchInput] = useState("");
   const searchInputRef = useRef();
 
+  // Fetching the data based on searchInput
   const wordsQuery = useQuery(["words", searchInput], async () => {
     const res = await fetch(`https://api.datamuse.com/words?ml=${searchInput}`);
     const json = await res.json();
     return json;
   });
 
+  // Fetching suggestions based on searchInput
   const suggestionsQuery = useQuery(["suggestions", searchInput], async () => {
     const res = await fetch(`https://api.datamuse.com/sug?s=${searchInput}`);
     const json = await res.json();
     return json;
   });
 
-  const updateQueryParam = useCallback(
-    debounce((input) => {
-      const currentQuery = new URLSearchParams(window.location.search).get("query");
-      if (currentQuery !== input) {
-        router.replace(`${pathName}?query=${input}`);
-      }
-    }, 300),
-    [pathName, router]
-  );
-
-  useEffect(() => {
-    updateQueryParam(searchInput);
-  }, [searchInput, updateQueryParam]);
+  // useEffect(() => {
+    // const currentQuery = new URLSearchParams(window.location.search).get('query');
+    // if (currentQuery !== searchInput) {
+      // router.replace(`${pathName}?query=${searchInput}`);
+    // }
+  // }, [pathName, router, searchInput]);
 
   return (
     <Container>
@@ -109,11 +104,13 @@ export default function Layout({ children }) {
           <></>
         )}
       </Container>
-      {wordsQuery.status === "loading" ? (
+      {wordsQuery.status == "loading" ? (
         <CircularProgress />
       ) : (
         <main>{children}</main>
       )}
+
+      {/* <footer>Footer</footer> */}
     </Container>
   );
 }
