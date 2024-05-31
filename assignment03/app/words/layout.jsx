@@ -42,7 +42,10 @@ export default function Layout({ children }) {
   });
 
   useEffect(() => {
-    router.replace(`${pathName}?query=${searchInput}`);
+    const currentQuery = new URLSearchParams(window.location.search).get('query');
+    if (currentQuery !== searchInput) {
+      router.replace(`${pathName}?query=${searchInput}`);
+    }
   }, [pathName, router, searchInput]);
 
   return (
