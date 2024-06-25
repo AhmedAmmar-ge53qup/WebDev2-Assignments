@@ -22,19 +22,61 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 export default function Ideas() {
   const [isClicked, setIsClicked] = useState(false);
-  const [ideas, setIdeas] = useState([]);
   const titleRef = useRef();
   const descriptionRef = useRef();
   const [isTitle, setIsTitle] = useState(false);
   const [isDescription, setIsDescription] = useState(false);
+  const queryClient = useQueryClient();
+  const [user, setUser] = useState(null);
 
-   // Load ideas from localStorage when component mounts
-   useEffect(() => {
-    const storedIdeas = JSON.parse(localStorage.getItem("ideas"));
-    if (storedIdeas) {
-      setIdeas(storedIdeas);
+  // Get or generate user ID
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("user_id");
+    if (storedUserId) {
+      setUser(storedUserId);
+    } else {
+      axios.get("/api/identifier").then((response) => {
+        const newUserId = response.data.uuid;
+        localStorage.setItem("user_id", newUserId);
+        setUser(newUserId);
+      });
     }
   }, []);
+
+  // Fetch ideas
+  const { data: ideas, isLoading, error } = useQuery(["ideas", user], async () => {
+    if (user) {
+      const response = await axios.get(`/api/${user}/ideas`);
+      return response.data;
+    }
+    return [];
+  }, {
+    enabled: !!user, // Only run the query if the user is set
+  });
+
+  // Mutation for adding an idea
+  const addIdeaMutation = useMutation(
+    async (newIdea) => {
+      await axios.post(`/api/${user}/ideas`, newIdea);
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["ideas", user]);
+      },
+    }
+  );
+
+  // Mutation for deleting an idea
+  const deleteIdeaMutation = useMutation(
+    async (id) => {
+      await axios.delete(`/api/${user}/ideas`, { data: { id } });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["ideas", user]);
+      },
+    }
+  );
 
   const addIdea = () => {
     const newIdea = {
@@ -43,41 +85,42 @@ export default function Ideas() {
       description: descriptionRef.current.value,
       date: moment().format("MMMM Do YYYY, h:mm:ss a"),
     };
-    // Update localStorage
-    const updatedIdeas = [...ideas, newIdea];
-    localStorage.setItem("ideas", JSON.stringify(updatedIdeas));
-    // Update state
-    setIdeas(updatedIdeas);
+    addIdeaMutation.mutate(newIdea);
     setIsClicked(false);
     titleRef.current.value = "";
     descriptionRef.current.value = "";
   };
-  
+
   const deleteIdea = (id) => {
-    // Update localStorage
-    const updatedIdeas = ideas.filter((idea) => idea.id !== id);
-    localStorage.setItem("ideas", JSON.stringify(updatedIdeas));
-    // Update state
-    setIdeas(updatedIdeas);
+    deleteIdeaMutation.mutate(id);
   };
 
   const buttonOrNot = isClicked ? (
     <Form>
-      <TextField sx={{ minWidth: 250 }} label="Title" inputRef={titleRef} onInput={(e) => e.target.value != "" ? setIsTitle(true) : setIsTitle(false)}/>
+      <TextField
+        sx={{ minWidth: 250 }}
+        label="Title"
+        inputRef={titleRef}
+        onInput={(e) =>
+          e.target.value !== "" ? setIsTitle(true) : setIsTitle(false)
+        }
+      />
       <TextField
         sx={{ minWidth: 250 }}
         label="Description"
         multiline
         rows={10}
         inputRef={descriptionRef}
-        onInput={(e) => e.target.value != "" ? setIsDescription(true) : setIsDescription(false)}
+        onInput={(e) =>
+          e.target.value !== "" ? setIsDescription(true) : setIsDescription(false)
+        }
       />
       <Grid>
         <IconButton
           onClick={addIdea}
-          disabled={isTitle && isDescription ? false : true}
+          disabled={!(isTitle && isDescription)}
         >
-          {false ? (
+          {addIdeaMutation.isLoading ? (
             <CircularProgress />
           ) : (
             <SaveIcon color={isTitle && isDescription ? "success" : "disabled"} />
@@ -94,6 +137,14 @@ export default function Ideas() {
     </Button>
   );
 
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">Error loading ideas: {error.message}</Typography>;
+  }
+
   return (
     <Container>
       <Grid
@@ -106,41 +157,35 @@ export default function Ideas() {
       >
         {buttonOrNot}
         <Grid container flexDirection={"column"} rowGap={1.5} maxWidth={600}>
-          {!ideas ? (
-            <CircularProgress />
-          ) : (
-            ideas.map((idea)=> (
-              <Card key={idea.id}>
-                <CardContent>
-                  <Typography variant="h4">{idea.title}</Typography>
-                  <Typography
-                    fontWeight={"light"}
-                    variant="subtitle2"
-                    display="block"
-                  >
-                    {idea.description}
-                  </Typography>
-                  <Typography
-                    fontWeight={"light"}
-                    marginTop={0.5}
-                    variant="caption"
-                    display="block"
-                  >
-                    {idea.date}
-                  </Typography>
-                  {false? (
+          {ideas?.map((idea) => (
+            <Card key={idea.id}>
+              <CardContent>
+                <Typography variant="h4">{idea.title}</Typography>
+                <Typography
+                  fontWeight={"light"}
+                  variant="subtitle2"
+                  display="block"
+                >
+                  {idea.description}
+                </Typography>
+                <Typography
+                  fontWeight={"light"}
+                  marginTop={0.5}
+                  variant="caption"
+                  display="block"
+                >
+                  {idea.date}
+                </Typography>
+                <IconButton onClick={() => deleteIdea(idea.id)}>
+                  {deleteIdeaMutation.isLoading ? (
                     <CircularProgress />
                   ) : (
-                    <IconButton
-                      onClick={() =>  deleteIdea(idea.id)}
-                    >
-                      <DeleteIcon color="error" />
-                    </IconButton>
+                    <DeleteIcon color="error" />
                   )}
-                </CardContent>
-              </Card>
-            ))
-          )}
+                </IconButton>
+              </CardContent>
+            </Card>
+          ))}
         </Grid>
       </Grid>
     </Container>

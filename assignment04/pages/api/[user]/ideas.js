@@ -1,54 +1,74 @@
-import fs from "fs";
+import {where, query, collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getFirestore } from 'firebase/firestore';
+
+
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD5gpf1ZdOllJ3xdbE4SRX5vedq4i0L_Ks",
+  authDomain: "react-query-mutations.firebaseapp.com",
+  projectId: "react-query-mutations",
+  storageBucket: "react-query-mutations.appspot.com",
+  messagingSenderId: "925162184858",
+  appId: "1:925162184858:web:ff9ecbebfe80b9e542bf23"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ideasCollection = collection(db, "ideas");
 
 export default async function handler(req, res) {
-
-  let ideas = [];
-  if (fs.existsSync("/tmp/ideas.json"))
-  {
-    const file = await fs.promises.readFile("/tmp/ideas.json");
-    ideas = JSON.parse(file);
-  }
-  else
-    fs.writeFile("/tmp/ideas.json", "[]", function (err) {
-      if (err) throw err;
-      console.log("ideas.json Created !");
-    });
-    
   switch (req.method) {
     case "POST":
-      ideas.push(req.body);
+      const { user } = req.query;
+      const newIdea = { ...req.body, user };
 
-      fs.writeFile("/tmp/ideas.json", JSON.stringify(ideas), (err) => {
-        if (err) {
-          console.log(err);
-          res.status(500).json({ failed: `Posting Idea Failed` });
-        } else {
-          console.log("File written successfully\n");
-          console.log("The written has the following contents:");
-          res.status(200).json({ success: `Idea Added` });
-        }
-      });
-      break;
-    case "PUT":
-      res.status(500).json({ error: `PUT not supported` });
-      break;
+      try {
+        const docRef = await addDoc(ideasCollection, newIdea);
+        const savedIdea = { id: docRef.id, ...newIdea };
+        return res.status(200).json({ success: "Idea Added", idea: savedIdea });
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        return res.status(500).json({ error: `Posting Idea Failed: ${error.message}` });
+      }
+
     case "DELETE":
-      const newIdeas = [...ideas.filter(idea => idea.id != req.body.id)]
-      fs.writeFile("/tmp/ideas.json", JSON.stringify(newIdeas), (err) => {
-        if (err) {
-          console.log(err);
-          res.status(500).json({ failed: `Deleting Idea Failed` });
+      const { id } = req.body;
+
+      try {
+        // Query Firestore to find the document with your custom id attribute
+        const q = query(ideasCollection, where("id", "==", id));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // Delete the document with Firestore-generated ID
+          const docToDelete = querySnapshot.docs[0]; // Assuming there's only one match
+          await deleteDoc(doc(ideasCollection, docToDelete.id));
+          return res.status(200).json({ success: "Idea Deleted" });
         } else {
-          console.log("File written successfully\n");
-          console.log("The written has the following contents:");
-          res.status(200).json({ success: `Idea Deleted` });
+          return res.status(404).json({ error: "Idea not found" });
         }
-      });
-      break;
+      } catch (error) {
+        console.error("Error deleting document: ", error);
+        return res.status(500).json({ error: `Deleting Idea Failed: ${error.message}` });
+      }
+
     case "GET":
-      res.status(200).json(ideas.filter(idea => idea.user == req.query.user));
-      break;
+      try {
+        const snapshot = await getDocs(ideasCollection);
+        const ideas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return res.status(200).json(ideas);
+      } catch (error) {
+        console.error("Error getting documents: ", error);
+        return res.status(500).json({ error: `Fetching Ideas Failed: ${error.message}` });
+      }
+
     default:
-      break;
+      return res.status(405).json({ error: `Method ${req.method} not allowed` });
   }
 }

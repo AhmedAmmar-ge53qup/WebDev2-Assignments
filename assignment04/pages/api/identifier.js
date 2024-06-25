@@ -1,53 +1,49 @@
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
+import { collection, addDoc } from "firebase/firestore";
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getFirestore } from 'firebase/firestore';
+
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD5gpf1ZdOllJ3xdbE4SRX5vedq4i0L_Ks",
+  authDomain: "react-query-mutations.firebaseapp.com",
+  projectId: "react-query-mutations",
+  storageBucket: "react-query-mutations.appspot.com",
+  messagingSenderId: "925162184858",
+  appId: "1:925162184858:web:ff9ecbebfe80b9e542bf23"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default async function handler(req, res) {
-  let users = [];
-  if (fs.existsSync("/tmp/users.json"))
-  {
-    const file = await fs.promises.readFile("/tmp/users.json");
-    users = JSON.parse(file);
-  }
-  else
-    fs.writeFile("/tmp/users.json", "[]", function (err) {
-      if (err) throw err;
-      console.log("Users.json created !");
-    });
+  const usersCollection = collection(db, "users");
 
   switch (req.method) {
     case "POST":
-      res.status(500).json({ error: `POST not supported` });
-      break;
+      return res.status(500).json({ error: `POST not supported` });
     case "PUT":
-      res.status(500).json({ error: `PUT not supported` });
-      break;
+      return res.status(500).json({ error: `PUT not supported` });
     case "DELETE":
-      res.status(500).json({ error: `DELETE not supported` });
-      break;
+      return res.status(500).json({ error: `DELETE not supported` });
     case "GET":
       if (!req.query.uuid) {
         const tmpUuid = uuidv4();
-        users.push(tmpUuid);
-        console.log("=========== users ===========");
-        console.log(users);
-        fs.writeFile("/tmp/users.json", JSON.stringify(users), (err) => {
-          if (err) {
-            console.log(err);
-            res.status(500).json({ failed: `Generating UUID Failed` });
-          } else {
-            console.log("File written successfully\n");
-            console.log("The written has the following contents:");
-            res.status(200).json(tmpUuid);
-          }
-        });
+        try {
+          await addDoc(usersCollection, { uuid: tmpUuid });
+          return res.status(200).json({ uuid: tmpUuid });
+        } catch (error) {
+          console.error("Error adding document: ", error);
+          return res.status(500).json({ error: `Generating UUID Failed: ${error.message}` });
+        }
+      } else {
+        return res.status(400).json({ error: "UUID query parameter is not supported" });
       }
-
-      // if (req.query.uuid)
-      //     res.status(500).json("User Already Exists, cant re-generate")
-      // else
-      //     res.status(200).json(uuidv4());
-      break;
     default:
-      break;
+      return res.status(405).json({ error: `Method ${req.method} not allowed` });
   }
 }
