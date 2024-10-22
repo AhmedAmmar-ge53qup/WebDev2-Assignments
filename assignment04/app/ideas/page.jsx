@@ -41,7 +41,9 @@ export default function Ideas() {
         setUser(newUserId);
       });
     }
+    
   }, []);
+  
 
   // Fetch ideas
   const { data: ideas, isLoading, error } = useQuery(["ideas", user], async () => {
@@ -50,8 +52,6 @@ export default function Ideas() {
       return response.data;
     }
     return [];
-  }, {
-    enabled: !!user, // Only run the query if the user is set
   });
 
   // Mutation for adding an idea
@@ -176,6 +176,7 @@ export default function Ideas() {
                 >
                   {idea.date}
                 </Typography>
+                <Typography variant="subtitle2" fontWeight="light" display="block">User ID: {idea.user}</Typography>
                 <IconButton onClick={() => deleteIdea(idea.id)}>
                   {deleteIdeaMutation.isLoading ? (
                     <CircularProgress />
